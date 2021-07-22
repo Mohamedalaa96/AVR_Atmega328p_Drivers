@@ -1,5 +1,5 @@
 /**************************************************************/
-/* GPIO Interface FILE                                        */
+/* UART Interface FILE                                        */
 /* Author   : Mohamed Alaa                                    */                    
 /* Date     : 8 May 2021                                      */
 /* Version  : V001                                            */

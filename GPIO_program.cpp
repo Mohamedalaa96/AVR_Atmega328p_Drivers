@@ -6,13 +6,13 @@
 /**************************************************************/
 
 //LOWER LAYERS INCLUDE
-#include "STD_TYPES.h"
-#include "BIT_MATH.h"
+#include "01_SERVICS/STD_TYPES.h"
+#include "01_SERVICS/BIT_MATH.h"
 
 /* Driver Header Files Include */
 #include "GPIO_interface.h"
 #include "GPIO_private.h"
-#include "GPIO_config.h"
+//#include "GPIO_config.h"
 
 void MGPIO_voidSetPinMode(MGPIOx_t * MGPIOx_tPort, uint8_t copy_uint8_tPin , uint8_t copy_uint8_tMode)
 {
