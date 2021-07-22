@@ -8,6 +8,7 @@
 #ifndef UART_PRIVATE_H
 #define UART_PRIVATE_H
 
+#define NULL 0
 /*  USSR0A  Bits    */
 #define RXC0        7   /* UART Receive Complete (Flag) */
 #define TXC0        6   /* UART Transmit Complete (Flag) */
@@ -45,6 +46,37 @@
 #define UBRR0L              ( *(volatile u8 *) (0xC4))    /* Baud Rate Register (LOW)   */
 #define UBRR0H              ( *(volatile u8 *) (0xC5))    /* Baud Rate Register (HIGH)   */
 #define UDR0                ( *(volatile u8 *) (0xC6))    /* I/O Data Register  */
+
+/* Configuration Paramitters */
+
+
+#define ASYNCHRONOUS	        1
+#define SYNCHRONOUS             3
+
+
+#define SIGNLE_SPEED_MODE       1
+#define DOUBLE_SPEED_MODE       3
+
+
+
+#define ONE_BIT                 1
+#define TWO_BITS                3
+
+#define DISABLED                1
+#define EVEN                    3
+#define ODD                     5
+
+
+#define BITS_5                  1
+#define BITS_6                  3
+#define BITS_7                  5
+#define BITS_8                  7
+#define BITS_9                  9
+                                        
+
+#define RX_RISING_EDGE          1 
+#define RX_FALLING_EDGE         3
+ 
 
 
 #endif

@@ -3,16 +3,22 @@
 #include "01_SERVICS/BIT_MATH.h"
 #include "UART_interface.h"
 
-// the setup function runs once when you press reset or power the board
 
 void setup() {
     MUART_voidInit();
+    MUART_voidTransmitString("Hello, World\n");
+    
+
+
  }
 
 // the loop function runs over and over again forever
 void loop() {
-  MUART_voidTransmitByte('a');
-  MUART_voidTransmitByte('\n');
+  if (MUART_u8isAvailable()){
+    char x = MUART_u8ReceiveByte();
+    if (x != 10)
+      MUART_voidTransmitByte(x+3);
+  }
 
   delay(100);
   }
