@@ -15,7 +15,6 @@ void MUART_voidInit(void);
 void MUART_voidTransmitByte(u8 copy_u8TransmittedByte);
 void MUART_voidTransmitString(char * ptr_u8TransmittedString);
 u8  MUART_u8isAvailable(void);
-
 u8  MUART_u8ReceiveByte(void);
 
 
