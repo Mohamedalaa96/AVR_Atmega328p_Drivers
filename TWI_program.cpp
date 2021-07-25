@@ -8,143 +8,101 @@
 //LOWER LAYERS INCLUDE
 #include "01_SERVICS/STD_TYPES.h"
 #include "01_SERVICS/BIT_MATH.h"
+
 /* Driver Header Files Include */
 #include "TWI_interface.h"
 #include "TWI_private.h"
 #include "TWI_config.h"
+#include "GPIO_interface.h"
 
 
-void MTWI_voidInit(void){
-  /* Hold the calculated buadrate register value   */
-  u16 LOCAL_u16BuadEquation = 0;
-  /* Hold the value of the UCSR0C Register to      */
-  /* avoid Multiple (Unnecessry Write operations)  */
-  u8  LOCAL_u8UCSR0C_Temp = 0 ; 
+void MTWI_voidInit(){ 
+  /* Prepare GPIO pins as Input */
 
-  /*    BuadRate Calculations & Set Operation Mode  */
-  #if (MODE_OF_OPERATION == ASYNCHRONOUS)
-      #if(SPEED_MODE == SIGNLE_SPEED_MODE)
-        LOCAL_u16BuadEquation = (( F_CPU/16/BUADRATE ) -1 );      
-      #elif(SPEED_MODE == DOUBLE_SPEED_MODE)
-        LOCAL_u16BuadEquation = (( F_CPU/8/BUADRATE ) -1 );
-      #endif
+  MGPIO_voidSetPinMode(MGPIO_GPIOC, 4 , MGPIO_MODE_INPUT_PUPD);   //SDA
+  MGPIO_voidSetPinMode(MGPIO_GPIOC, 5 , MGPIO_MODE_INPUT_PUPD);   //SCL
 
-      /*    Set ASYNCHRONOUS Mode     */
-      CLR_BIT(LOCAL_u8UCSR0C_Temp,UMSEL01);
-      CLR_BIT(LOCAL_u8UCSR0C_Temp,UMSEL00);
-
-      /*  SELECT Double/Single Tx Rate */
-      #if (SPEED_MODE == SIGNLE_SPEED_MODE)
-        CLR_BIT(UCSR0A,U2X0);
-      #elif (SPEED_MODE == DOUBLE_SPEED_MODE)
-        SET_BIT(UCSR0A,U2X0);
-      #endif
-
-  #elif(MODE_OF_OPERATION == SYNCHRONOUS)
-      LOCAL_u16BuadEquation = (( F_CPU/2/BUADRATE ) -1 );
-      
-      /*    Set SYNCHRONOUS Mode      */
-      CLR_BIT(LOCAL_u8UCSR0C_Temp,UMSEL01);
-      SET_BIT(LOCAL_u8UCSR0C_Temp,UMSEL00);
-
-      /*  AT SYNCHRONOUS MODE no double speed  */
-      CLR_BIT(UCSR0A,U2X0);
-
-      /*  CLOCK Polarity Edge Selction   */
-      #if (CLK_POLARITY == RX_RISING_EDGE)
-        SET_BIT(LOCAL_u8UCSR0C_Temp,UCPOL);
-      #else
-        CLR_BIT(LOCAL_u8UCSR0C_Temp,UCPOL);
-      #endif
-
-  #endif
-
-  UBRR0H = 8 >>LOCAL_u16BuadEquation;
-  UBRR0L = (u8)LOCAL_u16BuadEquation;
-
-  /*    No of Stop Bits Selection    */
-  #if (STOP_BITS == TWO_BITS)
-    SET_BIT(LOCAL_u8UCSR0C_Temp,USBS0);
-  #else
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,USBS0);
-  #endif
   
-  /*      Parity Bit Settings     */
-  #if ( PARITY_MODE == DISABLED)
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UPM01);
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UPM00);
-    
-  #elif (PARITY_MODE == EVEN)
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UPM01);
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UPM00);
-
-  #elif (PARITY_MODE == ODD)
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UPM01);
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UPM00);
-
-  #endif
-
-  #if DATA_BITS_PER_FRAME == BITS_5
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UCSZ00);
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UCSZ01);
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UCSZ02);
+  /* Set the Baudrate from equation           */     
+  /* CPU_F / [16 + (2*(TWBR) * PRE_SCALER )]  */
   
-  #elif DATA_BITS_PER_FRAME == BITS_6
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UCSZ00);
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UCSZ01);
-    CLR_BIT(UCSR0B,UCSZ02);
+  /* TWBR = 0 & Prescaler = x  ==> 1Mbps   I2C speed */
+  /* TWBR = 1 & Prescaler = 16  ==> 333Kbps I2C speed */
+  TWBR  = 1;  
+  /* Set Prescaler to (10) ==> Prescaler = 16 */ 
+  CLR_BIT(TWCR,TWPS0);
+  SET_BIT(TWCR,TWPS1);
 
-  #elif DATA_BITS_PER_FRAME == BITS_7
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UCSZ00);
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UCSZ01);
-    CLR_BIT(UCSR0B,UCSZ02);
 
-  #elif DATA_BITS_PER_FRAME == BITS_8
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UCSZ00);
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UCSZ01);
-    CLR_BIT(UCSR0B,UCSZ02);
+}
+u8 MTWI_u8BeginTransmission(u8 copy_u8Address){   /* Enable, send start condition then Send SLA+W */
   
-  #elif DATA_BITS_PER_FRAME == BITS_9
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UCSZ00);
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UCSZ01);
-    SET_BIT(UCSR0B,UCSZ02);
+  /* Clear Interrupt Flag, Send Start Bit , Enable TWI */
+  TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN);
+  /* Wait untill flag rised , so the start sent successfully */
+  while (!(TWCR & (1<<TWINT)));
+  /* Mask the Status register to get the only status bits 7:3 */
+  /* check the error code if isn't matches status code for start */
+  if ((TWSR & STATES_MASK) != START_SENT_CODE)
+  /* return 0 to indicate error happend in start */   
+    return 0;
+  /* Load the Address in the MSB 7 bits & (0) for WRITE operation */
+  TWDR = copy_u8Address << 1; 
+  /* Clear Interrupt flag , Start Transmission */ 
+  TWCR = (1<<TWINT) |(1<<TWEN); 
+  /* Wait untill flag rised , so the address sent finished */
+  while (!(TWCR & (1<<TWINT)));
+  /* Check the status code if not equal ACK of Address sent from slave */
+  /* return error , else continue */
+  if ( (TWSR & STATES_MASK) != SLA_ACK_CODE)
+  /* return 0 to indicate error happend address transmission */ 
+    return 0;
+  /* return 1, if there's no error happend and address sent */
+  /* (1) indicate successfull operation */
+  return 1;
+}
+u8 MTWI_u8TransmitByte(u8 copy_u8TransmittedByte){  /* Transmitt data, wait for ACK */
+  TWDR = copy_u8TransmittedByte;
+  /* Clear the flag, and start the transmission   */
+  TWCR = (1 << TWINT ) | (1 << TWEN ); 
+  /* Wait untill flag rised , so the data sent finished */
+  while (!(TWCR & (1<<TWINT)));
+  /* the status code doesn't match the data ack return error */ 
+  if ((TWSR & STATES_MASK) != DATA_ACK_CODE )
+  /* return error so data not sent */
+    return 0;
+  /* if there's no error happend, return 1 */
+  return 1;
+}
 
-  #endif
-
-  /*          Enable TX, RX         */
-  UCSR0B = (1<< RXEN0) | (1<< TXEN0) ; 
-  UCSR0C = LOCAL_u8UCSR0C_Temp; 
+/* Transmitt data, wait for ACK */
+u8 MTWI_u8TransmitString(char * ptr_u8TransmittedString){
+  
+  u8 Local_CharCounter = 0;
+  
+  while (ptr_u8TransmittedString[Local_CharCounter] != 0)
+  {
+    TWDR = ptr_u8TransmittedString[Local_CharCounter];
+    /* Clear the flag, and start the transmission   */
+    TWCR = (1 << TWINT ) | (1 << TWEN ); 
+    /* Wait untill flag rised , so the data sent finished */
+    while (!(TWCR & (1<<TWINT)));
+    /* the status code doesn't match the data ack return error */ 
+    if ((TWSR & STATES_MASK) != DATA_ACK_CODE )
+    /* return error so data not sent */
+      return 0;
+    Local_CharCounter++;
+  }
+  
+  /* if there's no error happend, return 1 */
+  return 1;
 
 }
 
-void MTWI_voidTransmitByte(u8 copy_u8TransmittedByte){
-    
-    /* Wait for empty transmit buffer */
-    while (!GET_BIT(UCSR0A,UDRE0)); 
-    /* Put data into buffer, sends the data */
-    UDR0 = copy_u8TransmittedByte;
+/* Send stop condition */
+void MTWI_voidEndTransmission(){
+  /* Send stop bit, enable transmission and clear flag */
+  TWCR = (1<< TWINT) | (1 << TWEN) | (1<< TWSTO);
 }
-void MTWI_voidTransmitString(char * ptr_u8TransmittedString){
-    u8 LOCAL_u8CharCounter = 0;
-    u8 LOCAL_u8Char = ptr_u8TransmittedString[LOCAL_u8CharCounter];
-    while (LOCAL_u8Char != NULL){  //Null Character
-      /* Wait for empty transmit buffer */
-      while (!GET_BIT(UCSR0A,UDRE0)); 
-      /* Transmit the charcter */
-      UDR0 = LOCAL_u8Char;
-      LOCAL_u8CharCounter++;
-      LOCAL_u8Char = ptr_u8TransmittedString[LOCAL_u8CharCounter];
-    }
-}
-u8  MTWI_u8isAvailable(void){
-  u8 LOCAL_u8ReturnFlag = 0;
-  /* Read the Rx Complete Flag */
-  LOCAL_u8ReturnFlag = GET_BIT(UCSR0A,RXC0);
-  return LOCAL_u8ReturnFlag;
-}
-u8  MTWI_u8ReceiveByte(void){
-  u8 LOCAL_u8ReceivedByte = UDR0;
-  return LOCAL_u8ReceivedByte;
 
 
-}

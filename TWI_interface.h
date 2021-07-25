@@ -8,14 +8,12 @@
 #define TWI_INTERFACE_H
 
 
-#define MTWI_BUADRATE      (9600)
 
-void MTWI_voidInit(void);
-
-void MTWI_voidTransmitByte(u8 copy_u8TransmittedByte);
-void MTWI_voidTransmitString(char * ptr_u8TransmittedString);
-u8  MTWI_u8isAvailable(void);
-u8  MTWI_u8ReceiveByte(void);
+void MTWI_voidInit();
+u8 MTWI_u8BeginTransmission(u8 copy_u8Address);
+u8 MTWI_u8TransmitByte(u8 copy_u8TransmittedByte);
+u8 MTWI_u8TransmitString(char * ptr_u8TransmittedString);
+void MTWI_voidEndTransmission();
 
 
 #endif
