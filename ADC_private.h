@@ -15,6 +15,7 @@
 //only to reduce time
 #include <avr/io.h>
 
+
 /** Maximum ADC frequency. */
 #define ADC_MAX_FREQ 200000
 /** Minimum ADC frequency. */
