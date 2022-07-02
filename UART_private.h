@@ -1,9 +1,13 @@
-/**************************************************************/
-/* UART PRIVATE FILE                                          */
-/* Author   : Mohamed Alaa                                    */                    
-/* Date     : 8 May 2021                                      */
-/* Version  : V001                                            */
-/**************************************************************/
+/**
+ * @file UART_private.h
+ * @author Mohamed Alaa (MohamedAlaaSultan7@Gmail.com)
+ * @brief MCAL Uart driver private file
+ * @version 0.1
+ * @date 2021-05-08
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 
 #ifndef UART_PRIVATE_H
 #define UART_PRIVATE_H

@@ -1,6 +1,9 @@
 #include <stdint.h>
-#include <Arduino.h>
+#include <avr/interrupt.h>
 
+#include <util/delay.h>  //To be removed later
+
+#include "01_SERVICS/STD_TYPES.h"
 #include "TIMER_interface.h"
 #include "TIMER_private.h"
 #include "TIMER_config.h"
@@ -19,6 +22,9 @@ void MTIMER_voidSetTimerPeriodic(void (*Callback) (void), uint16_t copy_u16Ticks
   sei();     // And put SREG back to what is was with the I bit however it was.
 }
 
+void MTIMER_voidDelay_ms (u16 copy_u16Delay_Millis){
+  _delay_ms(copy_u16Delay_Millis);
+}
 void MTIMER_voidEnableInterrupt(){
   TIMSK1 |= (1 << TOIE1);   // enable timer overflow interrupt
 }
@@ -26,7 +32,7 @@ void MTIMER_voidDisableInterrupt(){
   TIMSK1 &= (~(1 << TOIE1));
 }
 
- ISR(TIMER1_OVF_vect)        // interrupt service routine - tick every 0.1sec
+ISR(TIMER1_OVF_vect)        // interrupt service routine - tick every 0.1sec
 {
   TCNT1 = u16Ticks;   // set timer
   Ptr_Callback();

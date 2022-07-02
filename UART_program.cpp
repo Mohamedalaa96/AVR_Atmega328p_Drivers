@@ -15,13 +15,13 @@
 
 
 void MUART_voidInit(void){
-  /* Hold the calculated buadrate register value   */
+  /// Hold the calculated buadrate register value   
   u16 LOCAL_u16BuadEquation = 0;
-  /* Hold the value of the UCSR0C Register to      */
-  /* avoid Multiple (Unnecessry Write operations)  */
+  /// Hold the value of the UCSR0C Register to      
+  /// avoid Multiple (Unnecessry Write operations)  
   u8  LOCAL_u8UCSR0C_Temp = 0 ; 
 
-  /*    BuadRate Calculations & Set Operation Mode  */
+  ///    BuadRate Calculations & Set Operation Mode 
   #if (MODE_OF_OPERATION == ASYNCHRONOUS)
       #if(SPEED_MODE == SIGNLE_SPEED_MODE)
         LOCAL_u16BuadEquation = (( F_CPU/16/BUADRATE ) -1 );      
@@ -29,11 +29,11 @@ void MUART_voidInit(void){
         LOCAL_u16BuadEquation = (( F_CPU/8/BUADRATE ) -1 );
       #endif
 
-      /*    Set ASYNCHRONOUS Mode     */
+      ///    Set ASYNCHRONOUS Mode     
       CLR_BIT(LOCAL_u8UCSR0C_Temp,UMSEL01);
       CLR_BIT(LOCAL_u8UCSR0C_Temp,UMSEL00);
 
-      /*  SELECT Double/Single Tx Rate */
+      ///  SELECT Double/Single Tx Rate 
       #if (SPEED_MODE == SIGNLE_SPEED_MODE)
         CLR_BIT(UCSR0A,U2X0);
       #elif (SPEED_MODE == DOUBLE_SPEED_MODE)
@@ -43,14 +43,14 @@ void MUART_voidInit(void){
   #elif(MODE_OF_OPERATION == SYNCHRONOUS)
       LOCAL_u16BuadEquation = (( F_CPU/2/BUADRATE ) -1 );
       
-      /*    Set SYNCHRONOUS Mode      */
+      ///    Set SYNCHRONOUS Mode      
       CLR_BIT(LOCAL_u8UCSR0C_Temp,UMSEL01);
       SET_BIT(LOCAL_u8UCSR0C_Temp,UMSEL00);
 
-      /*  AT SYNCHRONOUS MODE no double speed  */
+      ///  AT SYNCHRONOUS MODE no double speed  
       CLR_BIT(UCSR0A,U2X0);
 
-      /*  CLOCK Polarity Edge Selction   */
+      ///  CLOCK Polarity Edge Selction   */
       #if (CLK_POLARITY == RX_RISING_EDGE)
         SET_BIT(LOCAL_u8UCSR0C_Temp,UCPOL);
       #else
@@ -62,7 +62,7 @@ void MUART_voidInit(void){
   UBRR0H = 8 >>LOCAL_u16BuadEquation;
   UBRR0L = (u8)LOCAL_u16BuadEquation;
 
-  /*    No of Stop Bits Selection    */
+  ///    No of Stop Bits Selection    
   #if (STOP_BITS == TWO_BITS)
     SET_BIT(LOCAL_u8UCSR0C_Temp,USBS0);
   #else
