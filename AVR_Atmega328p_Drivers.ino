@@ -9,11 +9,7 @@
 #include <stdlib.h>
 
 void ToggleLED(){
-  if (MGPIO_uint8_tGetPinValue(MGPIO_GPIOB,5) == 0)
-   MGPIO_voidSetPinValue(MGPIO_GPIOB,5,1);
-  else 
-    MGPIO_voidSetPinValue(MGPIO_GPIOB,5,0);
-
+  MGPIO_voidTogglePin(MGPIO_GPIOB,5);
 }
 void setup() {
     
@@ -28,7 +24,7 @@ void setup() {
 void loop() {
   static uint8_t i = 0;
   char buffer[10]={0}; 
-  intToString(i++,buffer);
+  intToString(MADC_u16PoolingRead(6),buffer);
   MUART_voidTransmitString(buffer);
   MUART_voidTransmitString(" ,Hello\n\r");
   MTIMER_voidDelay_ms(1000);

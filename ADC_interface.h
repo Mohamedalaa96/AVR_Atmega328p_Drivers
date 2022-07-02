@@ -19,8 +19,9 @@
 #include "01_SERVICS/STD_TYPES.h"
 #include "01_SERVICS/BIT_MATH.h"
 
+
 /**
- * @brief 
+ * @brief Initialize the ADC and Prescaler
  * @param void
  * @return  void 
  */

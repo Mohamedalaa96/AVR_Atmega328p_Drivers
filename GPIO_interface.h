@@ -33,13 +33,22 @@ void MGPIO_voidSetPinMode(MGPIOx_t * MGPIOx_tPort, uint8_t copy_uint8_tPin , uin
 void MGPIO_voidSetPinValue(MGPIOx_t * MGPIOx_tPort, uint8_t copy_uint8_tPin , uint8_t copy_uint8_tValue);
 
 /**
+ * @brief Toggle GPIO Pin value
+ * 
+ * @param MGPIOx_tPort          Select Port MGPIO_GPIOx, where x is Port Name (A,B,C,D)
+ * @param copy_uint8_tPin       Select the Pin [0-7]
+ */
+
+void MGPIO_voidTogglePin(MGPIOx_t * MGPIOx_tPort, uint8_t copy_uint8_tPin);
+
+/**
  * @brief Read pin value at INPUT or OUTPUT mode
  * 
  * @param MGPIOx_tPort      Select Port MGPIO_GPIOx, where x is Port Name (A,B,C,D)
  * @param copy_uint8_tPin   Select the Pin [0-7
  * @return uint8_t          value of this Pin [0,1]
  */
-uint8_t MGPIO_uint8_tGetPinValue(MGPIOx_t * MGPIOx_tPort, uint8_t copy_uint8_tPin );
+uint8_t MGPIO_u8GetPinValue(MGPIOx_t * MGPIOx_tPort, uint8_t copy_uint8_tPin );
 
 
 #endif

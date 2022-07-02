@@ -1,10 +1,13 @@
-/**************************************************************/
-/* UART Prog FILE                                             */
-/* Author   : Mohamed Alaa                                    */                    
-/* Date     : 21 Jul 2021                                     */
-/* Version  : V001                                            */
-/**************************************************************/
-
+/**
+ * @file UART_program.cpp
+ * @author Mohamed Alaa (MohamedAlaaSultan7@Gmail.com)
+ * @brief 
+ * @version 0.2
+ * @date 2022-07-02
+ * 0.2 -> changed the register access to struct 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 //LOWER LAYERS INCLUDE
 #include "01_SERVICS/STD_TYPES.h"
 #include "01_SERVICS/BIT_MATH.h"
@@ -19,7 +22,6 @@ void MUART_voidInit(void){
   u16 LOCAL_u16BuadEquation = 0;
   /// Hold the value of the UCSR0C Register to      
   /// avoid Multiple (Unnecessry Write operations)  
-  u8  LOCAL_u8UCSR0C_Temp = 0 ; 
 
   ///    BuadRate Calculations & Set Operation Mode 
   #if (MODE_OF_OPERATION == ASYNCHRONOUS)
@@ -30,31 +32,31 @@ void MUART_voidInit(void){
       #endif
 
       ///    Set ASYNCHRONOUS Mode     
-      CLR_BIT(LOCAL_u8UCSR0C_Temp,UMSEL01);
-      CLR_BIT(LOCAL_u8UCSR0C_Temp,UMSEL00);
+      UCSR0C->UMSEL01 = 0;
+      UCSR0C->UMSEL00 = 0 ;
 
       ///  SELECT Double/Single Tx Rate 
       #if (SPEED_MODE == SIGNLE_SPEED_MODE)
-        CLR_BIT(UCSR0A,U2X0);
+        UCSR0A->U2X0 = 0;
       #elif (SPEED_MODE == DOUBLE_SPEED_MODE)
-        SET_BIT(UCSR0A,U2X0);
+        UCSR0A->U2X0 = 1;
       #endif
 
   #elif(MODE_OF_OPERATION == SYNCHRONOUS)
       LOCAL_u16BuadEquation = (( F_CPU/2/BUADRATE ) -1 );
       
       ///    Set SYNCHRONOUS Mode      
-      CLR_BIT(LOCAL_u8UCSR0C_Temp,UMSEL01);
-      SET_BIT(LOCAL_u8UCSR0C_Temp,UMSEL00);
+      UCSR0C->UMSEL01 = 0;
+      UCSR0C->UMSEL00 = 1;
 
       ///  AT SYNCHRONOUS MODE no double speed  
-      CLR_BIT(UCSR0A,U2X0);
+      UCSR0A->U2X0 = 0;
 
       ///  CLOCK Polarity Edge Selction   */
       #if (CLK_POLARITY == RX_RISING_EDGE)
-        SET_BIT(LOCAL_u8UCSR0C_Temp,UCPOL);
+        UCSR0C->UCPOL = 1;
       #else
-        CLR_BIT(LOCAL_u8UCSR0C_Temp,UCPOL);
+        UCSR0C->UCPOL = 0;
       #endif
 
   #endif
@@ -64,63 +66,63 @@ void MUART_voidInit(void){
 
   ///    No of Stop Bits Selection    
   #if (STOP_BITS == TWO_BITS)
-    SET_BIT(LOCAL_u8UCSR0C_Temp,USBS0);
+    UCSR0C->USBS0 = 1;
   #else
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,USBS0);
+    UCSR0C->USBS0 = 0;
   #endif
   
   /*      Parity Bit Settings     */
   #if ( PARITY_MODE == DISABLED)
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UPM01);
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UPM00);
+    UCSR0C->UPM01 = 0;
+    UCSR0C->UPM00 = 0;
     
   #elif (PARITY_MODE == EVEN)
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UPM01);
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UPM00);
+    UCSR0C->UPM01 = 1;
+    UCSR0C->UPM00 = 0;
 
   #elif (PARITY_MODE == ODD)
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UPM01);
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UPM00);
+    UCSR0C->UPM01 = 1;
+    UCSR0C->UPM00 = 1;
 
   #endif
 
   #if DATA_BITS_PER_FRAME == BITS_5
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UCSZ00);
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UCSZ01);
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UCSZ02);
+    UCSR0C->UCSZ00 = 0;
+    UCSR0C->UCSZ01 = 0;
+    UCSR0B->UCSZ02 = 0;
   
   #elif DATA_BITS_PER_FRAME == BITS_6
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UCSZ00);
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UCSZ01);
-    CLR_BIT(UCSR0B,UCSZ02);
+    UCSR0C->UCSZ00 = 1;
+    UCSR0C->UCSZ01 = 0;
+    UCSR0B->UCSZ02 = 0;
 
   #elif DATA_BITS_PER_FRAME == BITS_7
-    CLR_BIT(LOCAL_u8UCSR0C_Temp,UCSZ00);
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UCSZ01);
-    CLR_BIT(UCSR0B,UCSZ02);
+    UCSR0C->UCSZ00 = 0;
+    UCSR0C->UCSZ01 = 1;
+    UCSR0B->UCSZ02 = 0;
 
   #elif DATA_BITS_PER_FRAME == BITS_8
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UCSZ00);
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UCSZ01);
-    CLR_BIT(UCSR0B,UCSZ02);
+    UCSR0C->UCSZ00 = 1;
+    UCSR0C->UCSZ01 = 1;
+    UCSR0B->UCSZ02 = 0;
   
   #elif DATA_BITS_PER_FRAME == BITS_9
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UCSZ00);
-    SET_BIT(LOCAL_u8UCSR0C_Temp,UCSZ01);
-    SET_BIT(UCSR0B,UCSZ02);
+    UCSR0C->UCSZ00 = 1;
+    UCSR0C->UCSZ01 = 1;
+    UCSR0B->UCSZ02 = 1;
 
   #endif
 
   /*          Enable TX, RX         */
-  UCSR0B = (1<< RXEN0) | (1<< TXEN0) ; 
-  UCSR0C = LOCAL_u8UCSR0C_Temp; 
+  UCSR0B->RXEN0 = 1;
+  UCSR0B->TXEN0 = 1; 
 
 }
 
 void MUART_voidTransmitByte(u8 copy_u8TransmittedByte){
     
     /* Wait for empty transmit buffer */
-    while (!GET_BIT(UCSR0A,UDRE0)); 
+    while (!(UCSR0A->UDRE0)); 
     /* Put data into buffer, sends the data */
     UDR0 = copy_u8TransmittedByte;
 }
@@ -129,7 +131,7 @@ void MUART_voidTransmitString(char * ptr_u8TransmittedString){
     u8 LOCAL_u8Char = ptr_u8TransmittedString[LOCAL_u8CharCounter];
     while (LOCAL_u8Char != NULL){  //Null Character
       /* Wait for empty transmit buffer */
-      while (!GET_BIT(UCSR0A,UDRE0)); 
+      while (!(UCSR0A->UDRE0)); 
       /* Transmit the charcter */
       UDR0 = LOCAL_u8Char;
       LOCAL_u8CharCounter++;
@@ -139,7 +141,7 @@ void MUART_voidTransmitString(char * ptr_u8TransmittedString){
 u8  MUART_u8isAvailable(void){
   u8 LOCAL_u8ReturnFlag = 0;
   /* Read the Rx Complete Flag */
-  LOCAL_u8ReturnFlag = GET_BIT(UCSR0A,RXC0);
+  LOCAL_u8ReturnFlag = UCSR0A->RXC0;
   return LOCAL_u8ReturnFlag;
 }
 u8  MUART_u8ReceiveByte(void){

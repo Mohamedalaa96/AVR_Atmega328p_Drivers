@@ -16,10 +16,7 @@
 #include "ADC_interface.h"
 #include "ADC_config.h"
 
-/**
- * @brief Initialize the ADC and Prescaler
- * 
- */
+
 void MADC_voidInit(void){
     //local variable to hold register value to avoid multiple mem access.
     u8 LOC_u8ADCSRA = 0;

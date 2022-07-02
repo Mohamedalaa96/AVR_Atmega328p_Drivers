@@ -30,6 +30,11 @@ void MGPIO_voidSetPinValue(MGPIOx_t * MGPIOx_tPort, uint8_t copy_uint8_tPin , ui
         
 }
 
+void MGPIO_voidTogglePin(MGPIOx_t * MGPIOx_tPort, uint8_t copy_uint8_tPin)
+{
+    TOG_BIT(MGPIOx_tPort->PORTx,copy_uint8_tPin);
+        
+}
 uint8_t MGPIO_uint8_tGetPinValue(MGPIOx_t * MGPIOx_tPort, uint8_t copy_uint8_tPin )
 {
     uint8_t Local_uint8_tValue = 0;
